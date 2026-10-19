@@ -1,0 +1,43 @@
+name: Lucida Android Cloud Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Lucida Source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle 8.6 (No Wrapper Required)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.6'
+
+      - name: Run Unit Tests (One-Euro Filter & Math)
+        run: gradle :app:testDebugUnitTest
+
+      - name: Assemble Debug APK
+        run: gradle :app:assembleDebug
+
+      - name: Upload Installable Lucida APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lucida-Debug-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
