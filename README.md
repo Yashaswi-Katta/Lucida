@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.svg" width="180" alt="Lucida Logo" />
+</p>
+
 # Lucida Studio
 
 Lucida is an Android camera lucida/reference-overlay workspace. It combines a live back-camera preview with an imported drawing reference, alignment tools, tracing grids, and clean still-frame capture.
