@@ -15,14 +15,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import kotlin.math.roundToInt
 import com.lucida.studio.ui.theme.AmberGold
 import com.lucida.studio.ui.theme.CharcoalBorder
 import com.lucida.studio.ui.theme.CharcoalSurface
@@ -55,13 +52,11 @@ fun CameraPreviewLayer(
     var hasPermission by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
     }
-    var exposure by remember { mutableFloatStateOf(0f) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         hasPermission = granted
         if (!granted) onStatus("Camera permission denied; live preview and capture are unavailable")
     }
 
-    LaunchedEffect(capabilities.exposureIndex) { exposure = capabilities.exposureIndex.toFloat() }
     LaunchedEffect(capabilities.status) { onStatus(capabilities.status) }
     LaunchedEffect(opticsLocked, torchEnabled) { controller.updateSettings(opticsLocked, torchEnabled) }
 
@@ -113,27 +108,6 @@ fun CameraPreviewLayer(
                     ) {
                         Text("Grant Camera Permission", style = MaterialTheme.typography.labelLarge)
                     }
-                }
-            }
-        }
-        if (hasPermission && capabilities.supportsExposureCompensation && capabilities.isReady) {
-            Surface(
-                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 12.dp),
-                color = CharcoalSurface.copy(alpha = 0.90f),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    val ev = exposure * capabilities.exposureStepEv
-                    Text("EXPOSURE ${if (ev > 0f) "+" else ""}${"%.1f".format(ev)} EV", color = AmberGold,
-                        style = MaterialTheme.typography.labelSmall)
-                    Slider(
-                        value = exposure.coerceIn(capabilities.exposureMinimum.toFloat(), capabilities.exposureMaximum.toFloat()),
-                        onValueChange = { value ->
-                            exposure = value
-                            controller.setExposureCompensationIndex(value.roundToInt())
-                        },
-                        valueRange = capabilities.exposureMinimum.toFloat()..capabilities.exposureMaximum.toFloat()
-                    )
                 }
             }
         }
