@@ -32,11 +32,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lucida.studio.domain.imaging.TimelapseFrameRecorder
 import com.lucida.studio.ui.theme.AmberGold
 import com.lucida.studio.ui.theme.CharcoalSurface
@@ -57,7 +56,7 @@ fun WorkspaceScreen(
     cameraController: StudioCameraController,
     recorder: TimelapseFrameRecorder
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsState()
     val recording by recorder.state.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
