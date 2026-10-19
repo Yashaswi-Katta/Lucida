@@ -34,7 +34,9 @@ import kotlin.coroutines.resumeWithException
 class StudioCameraController(context: Context) {
     private val appContext = context.applicationContext
     private val mainExecutor: Executor = ContextCompat.getMainExecutor(appContext)
-    private val providerFuture: ListenableFuture<ProcessCameraProvider> = ProcessCameraProvider.getInstance(appContext)
+    private val providerFuture: ListenableFuture<ProcessCameraProvider>? = runCatching {
+        ProcessCameraProvider.getInstance(appContext)
+    }.getOrNull()
     private val mutableCapabilities = MutableStateFlow(CameraCapabilities())
     val capabilities: StateFlow<CameraCapabilities> = mutableCapabilities.asStateFlow()
 
@@ -63,15 +65,23 @@ class StudioCameraController(context: Context) {
     fun bind(owner: LifecycleOwner, view: PreviewView) {
         if (closed) return
         if (boundOwner === owner && previewView === view && (camera != null || bindPending)) return
+        val future = providerFuture
+        if (future == null) {
+            mutableCapabilities.value = mutableCapabilities.value.copy(
+                isReady = false,
+                status = "Camera service unavailable on this device"
+            )
+            return
+        }
         boundOwner = owner
         previewView = view
         bindPending = true
         mutableCapabilities.value = mutableCapabilities.value.copy(isReady = false, status = "Starting back camera...")
-        providerFuture.addListener({
+        future.addListener({
             bindPending = false
             if (closed || owner.lifecycle.currentState == androidx.lifecycle.Lifecycle.State.DESTROYED) return@addListener
             runCatching {
-                val cameraProvider = providerFuture.get()
+                val cameraProvider = future.get()
                 provider = cameraProvider
                 boundPreview?.let { oldPreview ->
                     imageCapture?.let { oldCapture -> cameraProvider.unbind(oldPreview, oldCapture) }
