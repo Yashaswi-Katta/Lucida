@@ -16,6 +16,7 @@
   <img src="https://img.shields.io/badge/Language-Kotlin%201.9.24-7F52FF?logo=kotlin" alt="Kotlin" />
   <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?logo=jetpackcompose" alt="Compose" />
   <img src="https://img.shields.io/badge/Styling-Dark%20Studio-FFB300" alt="Theme" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT" /></a>
 </p>
 
 ---
@@ -161,4 +162,4 @@ Lucida/
 
 ## 📄 License
 
-Lucida Studio is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
+Lucida Studio is licensed under the [MIT License](LICENSE).
