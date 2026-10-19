@@ -77,6 +77,7 @@ fun StudioHudBar(
     onSnapshot: () -> Unit,
     onRecordToggle: () -> Unit,
     onExport: () -> Unit,
+    onReplayTutorial: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -114,11 +115,22 @@ fun StudioHudBar(
                                 letterSpacing = 1.sp
                             )
                         )
-                        TextButton(
-                            onClick = { expanded = false },
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 2.dp)
-                        ) {
-                            Text("✕ Close", color = SlateMuted, fontSize = 13.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TextButton(
+                                onClick = {
+                                    expanded = false
+                                    onReplayTutorial()
+                                },
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text("📖 Guide", color = AmberGold, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                            TextButton(
+                                onClick = { expanded = false },
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text("✕ Close", color = SlateMuted, fontSize = 13.sp)
+                            }
                         }
                     }
 

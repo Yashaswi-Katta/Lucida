@@ -44,6 +44,7 @@ fun CameraPreviewLayer(
     opticsLocked: Boolean,
     torchEnabled: Boolean,
     modifier: Modifier = Modifier,
+    onPermissionResult: (Boolean) -> Unit = {},
     onStatus: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -54,7 +55,16 @@ fun CameraPreviewLayer(
     }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         hasPermission = granted
-        if (!granted) onStatus("Camera permission denied; live preview and capture are unavailable")
+        onPermissionResult(granted)
+        if (!granted) onStatus("Camera permission denied; live preview is unavailable")
+    }
+
+    LaunchedEffect(Unit) {
+        if (!hasPermission) {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        } else {
+            onPermissionResult(true)
+        }
     }
 
     LaunchedEffect(capabilities.status) { onStatus(capabilities.status) }

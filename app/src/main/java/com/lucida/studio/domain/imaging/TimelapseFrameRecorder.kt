@@ -1,6 +1,9 @@
 package com.lucida.studio.domain.imaging
 
+import android.content.ContentValues
 import android.content.Context
+import android.os.Build
+import android.provider.MediaStore
 import com.lucida.studio.ui.workspace.components.StudioCameraController
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +32,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.coroutines.coroutineContext
 
-/** Timed JPEG sequence recorder. It creates a ZIP sequence, not a muxed MP4/video file. */
+/** Timed JPEG sequence recorder and snapshot manager. */
 class TimelapseFrameRecorder(
     context: Context,
     private val controller: StudioCameraController
@@ -48,14 +51,43 @@ class TimelapseFrameRecorder(
     val state: StateFlow<RecordingState> = mutableState.asStateFlow()
     @Volatile private var recordingJob: Job? = null
 
-    /** Capture one clean ImageCapture still outside the Compose overlay. */
+    /** Capture one clean still and save it to both private storage and Android Gallery (Pictures/Lucida). */
     suspend fun snapshot(): File = captureMutex.withLock {
         withContext(Dispatchers.IO) {
             val folder = File(frameRoot, "snapshots")
             check(folder.mkdirs() || folder.isDirectory) { "Could not create the app's private snapshots directory" }
-            val file = File(folder, "snapshot_${System.currentTimeMillis()}_${UUID.randomUUID().toString().take(8)}.jpg")
+            val filename = "lucida_snap_${System.currentTimeMillis()}_${UUID.randomUUID().toString().take(6)}.jpg"
+            val file = File(folder, filename)
             controller.capture(file)
+
+            // Save copy directly to device's public Photos / Gallery in Pictures/Lucida
+            runCatching {
+                saveToGallery(file, filename)
+            }
             file
+        }
+    }
+
+    private fun saveToGallery(sourceFile: File, displayName: String) {
+        val resolver = appContext.contentResolver
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, displayName)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Lucida")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Images.Media.IS_PENDING, 1)
+            }
+        }
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues) ?: return
+        resolver.openOutputStream(uri)?.use { out ->
+            sourceFile.inputStream().buffered().use { input ->
+                input.copyTo(out)
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentValues.clear()
+            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+            resolver.update(uri, contentValues, null, null)
         }
     }
 

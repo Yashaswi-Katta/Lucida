@@ -1,5 +1,6 @@
 package com.lucida.studio.ui.workspace
 
+import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -54,6 +55,7 @@ import com.lucida.studio.ui.workspace.components.CornerCalibrationOverlay
 import com.lucida.studio.ui.workspace.components.GridOverlayDrawer
 import com.lucida.studio.ui.workspace.components.StudioCameraController
 import com.lucida.studio.ui.workspace.components.StudioHudBar
+import com.lucida.studio.ui.workspace.components.StudioTutorialDialog
 import com.lucida.studio.ui.workspace.components.TelemetryTopBar
 import com.lucida.studio.ui.workspace.components.TransformableCanvas
 import kotlinx.coroutines.launch
@@ -69,6 +71,9 @@ fun WorkspaceScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
+    val prefs = remember { context.getSharedPreferences("lucida_preferences", Context.MODE_PRIVATE) }
+    var hasSeenTutorial by remember { mutableStateOf(prefs.getBoolean("has_seen_tutorial", false)) }
+    var showTutorial by remember { mutableStateOf(false) }
     var intervalSeconds by remember { mutableLongStateOf(10L) }
     var captureBusy by remember { mutableStateOf(false) }
 
@@ -117,6 +122,11 @@ fun WorkspaceScreen(
             opticsLocked = state.opticsLocked,
             torchEnabled = state.torchEnabled,
             modifier = Modifier.fillMaxSize(),
+            onPermissionResult = { granted ->
+                if (granted && !hasSeenTutorial) {
+                    showTutorial = true
+                }
+            },
             onStatus = { viewModel.accept(WorkspaceIntent.CameraStatus(it)) }
         )
 
@@ -170,7 +180,7 @@ fun WorkspaceScreen(
                     scope.launch {
                         captureBusy = true
                         runCatching { recorder.snapshot() }
-                            .onSuccess { file -> viewModel.accept(WorkspaceIntent.CameraStatus("Clean frame saved · ${file.name}")) }
+                            .onSuccess { file -> viewModel.accept(WorkspaceIntent.CameraStatus("Saved to Gallery · Pictures/Lucida")) }
                             .onFailure { error -> viewModel.accept(WorkspaceIntent.ReportError("Snapshot failed: ${error.message}")) }
                         captureBusy = false
                     }
@@ -181,6 +191,7 @@ fun WorkspaceScreen(
                     }
                 },
                 onExport = { exportPicker.launch("lucida-sequence.zip") },
+                onReplayTutorial = { showTutorial = true },
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
 
@@ -224,6 +235,17 @@ fun WorkspaceScreen(
                     )
                 }
             }
+        }
+
+        // Interactive Studio Tutorial Dialog
+        if (showTutorial) {
+            StudioTutorialDialog(
+                onDismiss = {
+                    showTutorial = false
+                    hasSeenTutorial = true
+                    prefs.edit().putBoolean("has_seen_tutorial", true).apply()
+                }
+            )
         }
 
         // Error Notice Card (if any)
