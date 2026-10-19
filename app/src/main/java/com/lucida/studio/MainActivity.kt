@@ -8,7 +8,6 @@ import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,7 +59,6 @@ class MainActivity : ComponentActivity() {
     private var workspaceViewModel: WorkspaceViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         runCatching {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

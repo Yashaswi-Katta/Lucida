@@ -4,11 +4,13 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.camera.camera2.Camera2Config
+import androidx.camera.core.CameraXConfig
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.SvgDecoder
 
-class LucidaApp : Application(), ImageLoaderFactory {
+class LucidaApp : Application(), ImageLoaderFactory, CameraXConfig.Provider {
 
     companion object {
         @Volatile
@@ -35,7 +37,7 @@ class LucidaApp : Application(), ImageLoaderFactory {
             lastCrash = report
             runCatching {
                 val prefs = context.getSharedPreferences("lucida_crash_log", Context.MODE_PRIVATE)
-                prefs.edit().putString("last_fatal_crash", report).apply()
+                prefs.edit().putString("last_fatal_crash", report).commit()
             }
         }
 
@@ -50,7 +52,7 @@ class LucidaApp : Application(), ImageLoaderFactory {
             lastCrash = null
             runCatching {
                 val prefs = context.getSharedPreferences("lucida_crash_log", Context.MODE_PRIVATE)
-                prefs.edit().remove("last_fatal_crash").apply()
+                prefs.edit().remove("last_fatal_crash").commit()
             }
         }
     }
@@ -64,6 +66,8 @@ class LucidaApp : Application(), ImageLoaderFactory {
             defaultHandler?.uncaughtException(thread, throwable)
         }
     }
+
+    override fun getCameraXConfig(): CameraXConfig = Camera2Config.defaultConfig()
 
     override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
         .components { add(SvgDecoder.Factory()) }
