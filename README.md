@@ -12,6 +12,9 @@
   <a href="https://github.com/Yashaswi-Katta/Lucida/actions/workflows/android-cloud-build.yml">
     <img src="https://github.com/Yashaswi-Katta/Lucida/actions/workflows/android-cloud-build.yml/badge.svg" alt="Build Status" />
   </a>
+  <a href="https://github.com/Yashaswi-Katta/Lucida/releases">
+    <img src="https://img.shields.io/github/v/release/Yashaswi-Katta/Lucida?color=FFB300&logo=github" alt="Latest Release" />
+  </a>
   <img src="https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026--34)-3DDC84?logo=android" alt="Android API" />
   <img src="https://img.shields.io/badge/Language-Kotlin%201.9.24-7F52FF?logo=kotlin" alt="Kotlin" />
   <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?logo=jetpackcompose" alt="Compose" />
@@ -76,14 +79,18 @@ Artists can look through their screen and accurately trace, align proportions, i
 
 ## 📱 Download & Installation
 
-### Option 1: Download Latest Build (GitHub Actions)
-Precompiled, installable debug APKs are automatically built on every commit:
-1. Visit the [Lucida GitHub Actions Runs](https://github.com/Yashaswi-Katta/Lucida/actions/workflows/android-cloud-build.yml).
-2. Click on the latest run.
-3. Scroll down to the **Artifacts** section at the bottom of the page.
-4. Download **`Lucida-Debug-APK`**, extract the ZIP, and install the `.apk` on your Android device (API 26+).
+### Option 1: Direct APK Download (Recommended)
+You can directly download the compiled Android APK from the official release page:
+* 🚀 **[Download Latest Lucida Release (v1.0.0)](https://github.com/Yashaswi-Katta/Lucida/releases/latest)**
+* 📥 Direct download: [**`Lucida-v1.0.0.apk`**](https://github.com/Yashaswi-Katta/Lucida/releases/download/v1.0.0/Lucida-v1.0.0.apk)
 
-### Option 2: Build from Source
+### Option 2: CI Artifacts (Bleeding-Edge Nightly Builds)
+Precompiled debug APKs are also generated on every single commit by GitHub Actions:
+1. Visit the [Lucida GitHub Actions Runs](https://github.com/Yashaswi-Katta/Lucida/actions/workflows/android-cloud-build.yml).
+2. Click on the latest workflow run.
+3. Scroll down to the **Artifacts** section at the bottom of the page to download `Lucida-Debug-APK`.
+
+### Option 3: Build from Source
 Requirements:
 * **JDK 17+**
 * **Android SDK Platform 34 & Build-Tools**
